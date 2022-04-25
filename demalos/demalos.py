@@ -36,6 +36,7 @@ class demalos(object):
                 raise TypeError("only folders are allowed!")
 
     def download_alos(self,dem_file = None):
+        
         import wget
         '''
            Download ALOS DEM for 5 by 5 deg globally
@@ -45,11 +46,17 @@ class demalos(object):
 
         '''
         jaxa_url = 'https://www.eorc.jaxa.jp/ALOS/aw3d30/data/release_v2012/'
-        
+
+
+
+        if (dem_file is not None):
+            wget.download(jaxa_url + dem_file + '.zip', self.alos_folder_in, bar=self.bar_progress)
+            return
+
         hemisphere_1 = ['N','S']
         hemisphere_2 = ['W','E']
 
-        files = []
+        files = []      
         for h1 in hemisphere_1:
             for h2 in hemisphere_2:
                 for lat in range(0,95,5):
