@@ -168,7 +168,7 @@ class demalos(object):
 
         self.lat_alos = np.float32(lat_alos)
         self.lon_alos = np.float32(lon_alos)
-        self.alos_dem = np.array(alos_dem)
+        self.alos_dem = np.array(alos_dem).squeeze()
         self.crs = src.crs
         self.transform = out_trans
 
