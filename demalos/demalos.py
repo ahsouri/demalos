@@ -196,3 +196,29 @@ class demalos(object):
 
         new_tiff.write(self.alos_dem,1)
         new_tiff.close()
+    
+    def save_to_nc(self,filename):
+         
+        '''
+           save the outputs to a ncfile (filename) 
+           in alos_folder_out folder
+        '''
+
+        from netCDF4 import Dataset
+        import numpy as np
+        from numpy import dtype
+        import numpy as np  
+            
+        ncfile = Dataset(filename,'w')
+        # create the x and y dimensions.
+        ncfile.createDimension('x',np.shape(self.alos_dem)[0])
+        ncfile.createDimension('y',np.shape(self.alos_dem)[1])
+
+        data1 = ncfile.createVariable('ALOS_DEM',dtype('float64').char,('x','y'))
+        data1[:,:] = self.alos_dem
+        
+        data2 = ncfile.createVariable('lat',dtype('float64').char,('x','y'))
+        data2[:,:] = self.lat_alos
+        
+        data3 = ncfile.createVariable('lon',dtype('float64').char,('x','y'))
+        data3[:,:] = self.lon_alos
