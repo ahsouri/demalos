@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/485365918.svg)](https://zenodo.org/badge/latestdoi/485365918)
+
 # demalos
 Downloading and subsetting ALOS 30m DEM
 
