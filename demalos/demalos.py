@@ -100,8 +100,22 @@ class demalos(object):
         
         within_box = []
         intersect_box = []
+        # narrowing down the candidates based on lat/lon
+        selected_files = []
+        h1 = "N" if self.lat0>0 else "S"
+        h2 = "E" if self.lon0>0 else "W"
+        extention_lat = self.lat0+self.dlat if h1 == "N" else np.abs(self.lat0)-self.dlat
+        extention_lon = self.lon0+self.dlon if h2 == "E" else np.abs(self.lon0)-self.dlon       
+        steps_lat = 1 if h1 == "N" else -1
+        steps_lon = 1 if h2 == "E" else -1
+        for lat in range(int(np.floor(np.abs(self.lat0))),int(extention_lat+steps_lat),steps_lat):
+                    for lon in range(int(np.floor(np.abs(self.lon0))),int(extention_lon+steps_lon),steps_lon):
+                        file = h1 + f"{lat:03}" + h2 + f"{lon:03}" 
+                        path1 = glob.glob(self.alos_folder_in + '/*' + file + '*DSM.tif')
+                        print(self.alos_folder_in + '/*' + file + '*DSM.tif')
+                        if path1: selected_files.append(path1[0])
         # sort tiff files
-        alos_fname = sorted(glob.glob(self.alos_folder_in + '/*DSM.tif'))
+        alos_fname = sorted(selected_files)
 
         for fname in alos_fname:
             try:
@@ -140,8 +154,8 @@ class demalos(object):
                intersect_box.append(fname)
         
         if ((not within_box) and (not intersect_box)):
-            raise TypeError("the pool data do not cover this area; download more!")
-            
+            raise TypeError("the pool data do not cover this area; download more!") 
+
         if (not within_box) and (intersect_box):
             src_appended = []
             for int_box in range(len(intersect_box)):
@@ -150,7 +164,7 @@ class demalos(object):
                 
             alos_dem, out_trans = merge(src_appended)
             print('Several tiles are chosen from the pool')
-            # if there is at least one master to fully enclose the slave
+        # if there is at least one master to fully enclose the slave
         elif within_box:           
             print('The chosen ALOS file is ' +  within_box[0])
             src = rasterio.open(within_box[0])
@@ -158,17 +172,18 @@ class demalos(object):
             alos_dem = src.read(1)
 
         # getting lat and lons based on the transformation
+        alos_dem = np.array(alos_dem).squeeze()
         lat_alos = np.zeros_like(alos_dem)*np.nan
         lon_alos = np.zeros_like(alos_dem)*np.nan
         for i in range(np.shape(alos_dem)[0]):
             for j in range(np.shape(alos_dem)[1]):
-                temp = out_trans * (j,i)
-                lat_alos[i,j] = temp[0] 
-                lon_alos[i,j] = temp[1]
+                temp = np.array(out_trans * (j,i))
+                lat_alos[i,j] = temp[1] 
+                lon_alos[i,j] = temp[0]
 
         self.lat_alos = np.float32(lat_alos)
         self.lon_alos = np.float32(lon_alos)
-        self.alos_dem = np.array(alos_dem).squeeze()
+        self.alos_dem = alos_dem
         self.crs = src.crs
         self.transform = out_trans
 
@@ -209,7 +224,7 @@ class demalos(object):
         from numpy import dtype
         import numpy as np  
             
-        ncfile = Dataset(filename,'w')
+        ncfile = Dataset(self.alos_folder_out + filename,'w')
         # create the x and y dimensions.
         ncfile.createDimension('x',np.shape(self.alos_dem)[0])
         ncfile.createDimension('y',np.shape(self.alos_dem)[1])
@@ -217,8 +232,8 @@ class demalos(object):
         data1 = ncfile.createVariable('ALOS_DEM',dtype('float64').char,('x','y'))
         data1[:,:] = self.alos_dem
         
-        data2 = ncfile.createVariable('lat',dtype('float64').char,('x','y'))
+        data2 = ncfile.createVariable('lat',dtype('float32').char,('x','y'))
         data2[:,:] = self.lat_alos
         
-        data3 = ncfile.createVariable('lon',dtype('float64').char,('x','y'))
+        data3 = ncfile.createVariable('lon',dtype('float32').char,('x','y'))
         data3[:,:] = self.lon_alos
