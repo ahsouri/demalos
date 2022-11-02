@@ -105,8 +105,8 @@ class demalos(object):
         selected_files = []
         h1 = "N" if self.lat0>=0 else "S"
         h2 = "E" if self.lon0>=0 else "W"
-        extention_lat = self.lat0+self.dlat if h1 == "N" else np.abs(self.lat0)-self.dlat
-        extention_lon = self.lon0+self.dlon if h2 == "E" else np.abs(self.lon0)-self.dlon       
+        extention_lat = self.lat0+self.dlat + 1 if h1 == "N" else np.abs(self.lat0)-self.dlat
+        extention_lon = self.lon0+self.dlon + 1 if h2 == "E" else np.abs(self.lon0)-self.dlon       
         steps_lat = 1 if h1 == "N" else -1
         steps_lon = 1 if h2 == "E" else -1
 
