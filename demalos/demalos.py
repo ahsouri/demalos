@@ -100,20 +100,23 @@ class demalos(object):
         
         within_box = []
         intersect_box = []
-        # narrowing down the candidates based on lat/lon
+
+        # narrowing down the geotiff candidates based on lat/lon
         selected_files = []
-        h1 = "N" if self.lat0>0 else "S"
-        h2 = "E" if self.lon0>0 else "W"
+        h1 = "N" if self.lat0>=0 else "S"
+        h2 = "E" if self.lon0>=0 else "W"
         extention_lat = self.lat0+self.dlat if h1 == "N" else np.abs(self.lat0)-self.dlat
         extention_lon = self.lon0+self.dlon if h2 == "E" else np.abs(self.lon0)-self.dlon       
         steps_lat = 1 if h1 == "N" else -1
         steps_lon = 1 if h2 == "E" else -1
-        for lat in range(int(np.floor(np.abs(self.lat0))),int(extention_lat+steps_lat),steps_lat):
-                    for lon in range(int(np.floor(np.abs(self.lon0))),int(extention_lon+steps_lon),steps_lon):
+
+        for lat in range(int(np.abs(np.floor(self.lat0))),int(extention_lat+steps_lat),steps_lat):
+                    for lon in range(int(np.abs(np.floor(self.lon0))),int(extention_lon+steps_lon),steps_lon):
                         file = h1 + f"{lat:03}" + h2 + f"{lon:03}" 
                         path1 = glob.glob(self.alos_folder_in + '/*' + file + '*DSM.tif')
                         print(self.alos_folder_in + '/*' + file + '*DSM.tif')
                         if path1: selected_files.append(path1[0])
+
         # sort tiff files
         alos_fname = sorted(selected_files)
 
